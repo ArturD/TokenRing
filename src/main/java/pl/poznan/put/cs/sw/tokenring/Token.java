@@ -4,23 +4,25 @@
  */
 package pl.poznan.put.cs.sw.tokenring;
 
+import java.io.Serializable;
+
 /**
  *
  * @author Artur
  */
-public class Token {
-    long counter;
+public class Token implements Serializable {
+    private TokenColor color;
 
-    public Token(long counter) {
-        this.counter = counter;
+    public Token(TokenColor color) {
+        this.color = color;
     }
 
-    public long getCounter() {
-        return counter;
+    public TokenColor getColor() {
+        return color;
     }
 
-    public void setCounter(long counter) {
-        this.counter = counter;
+    public void setColor(TokenColor color) {
+        this.color = color;
     }
 
     @Override
@@ -32,7 +34,7 @@ public class Token {
             return false;
         }
         final Token other = (Token) obj;
-        if (this.counter != other.counter) {
+        if (this.color != other.color && (this.color == null || !this.color.equals(other.color))) {
             return false;
         }
         return true;
@@ -40,13 +42,13 @@ public class Token {
 
     @Override
     public int hashCode() {
-        int hash = 5;
-        hash = 17 * hash + (int) (this.counter ^ (this.counter >>> 32));
+        int hash = 7;
+        hash = 97 * hash + (this.color != null ? this.color.hashCode() : 0);
         return hash;
     }
 
     @Override
     public String toString() {
-        return "Token{" + "counter=" + counter + '}';
+        return "Token { color = " + color + " }";
     }
 }

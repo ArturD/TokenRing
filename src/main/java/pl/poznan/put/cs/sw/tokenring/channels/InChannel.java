@@ -9,5 +9,5 @@ package pl.poznan.put.cs.sw.tokenring.channels;
  * @author Artur
  */
 public interface InChannel {
-    void addMessageListener(MessageListener messageListener);
+    <T> void addMessageListener(Class<T> type, MessageListener<T> messageListener);
 }
