@@ -40,7 +40,8 @@ public class ChannelMock implements InChannel, OutChannel {
 
             @Override
             public void run() {
-                if(new Random().nextInt(100) >= losPorbability) {
+                int rnd = new Random().nextInt(100);
+                if(rnd >= losPorbability) {
                     logger.trace("message " + message + " passed from " + inId + " to " + outId + " ");
                     for(TypedMessageListener listener : listeners) {
                         if(message.getClass() == listener.getType())
