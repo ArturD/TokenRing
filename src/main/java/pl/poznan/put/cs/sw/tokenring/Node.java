@@ -5,7 +5,6 @@
 package pl.poznan.put.cs.sw.tokenring;
 
 import java.util.Random;
-import java.util.logging.Level;
 import pl.poznan.put.cs.sw.tokenring.channels.OutChannel;
 import pl.poznan.put.cs.sw.tokenring.channels.InChannel;
 import java.util.Timer;
@@ -27,14 +26,21 @@ public class Node {
     private final long repeatPeriod;
     private final String nodeId;
     private Token token;
-    private boolean resend = false;
-
-    public Node(InChannel inChannel, OutChannel outChannel, final Timer timer, long repeatPeriod, String nodeId) {
+    private boolean resendToken = false;
+    private TokenColor inColor = TokenColor.Black;
+    private TokenColor outColor = TokenColor.Black;
+    private boolean hasToken = false;
+    private boolean sendAck = false;
+    private final String nextId;
+    
+    public Node(InChannel inChannel, OutChannel outChannel, final Timer timer, long repeatPeriod, String nodeId, String nextId) {
         this.inChannel = inChannel;
         this.outChannel = outChannel;
         this.timer = timer;
         this.repeatPeriod = repeatPeriod;
         this.nodeId = nodeId;
+        this.nextId = nextId;
+
 
         timer.schedule(new TimerTask() {
 
@@ -44,7 +50,7 @@ public class Node {
             }
         }, 0, repeatPeriod);
 
-        inChannel.addMessageListener(new MessageListener<Token>() {
+        inChannel.addMessageListener(Token.class,new MessageListener<Token>() {
 
             public void onMessage(final Token message) {
                 timer.schedule(new TimerTask() {
@@ -52,6 +58,20 @@ public class Node {
                     @Override
                     public void run() {
                         receive(message);
+                    }
+                }, 0);
+            }
+        });
+
+
+        inChannel.addMessageListener(Ack.class,new MessageListener<Ack>() {
+
+            public void onMessage(final Ack message) {
+                timer.schedule(new TimerTask() {
+
+                    @Override
+                    public void run() {
+                        receiveAck(message);
                     }
                 }, 0);
             }
@@ -65,20 +85,28 @@ public class Node {
     }
 
     private synchronized void receive(final Token newToken) {
-        if (token == null || token.getCounter() < newToken.getCounter()) {
+        if (token == null || token.getColor() == inColor) {
             logger.trace("new token accepted at " + nodeId);
-            token = new Token(newToken.getCounter()+1);;
-            resend = false;
+            token = new Token(outColor);
+
+            resendToken = false;
+            sendAck = false;
+            outColor = change(outColor);
+            inColor = change(inColor);
             timer.schedule(new TimerTask() {
 
                 @Override
                 public void run() {
+                    hasToken = true;
                     doStuff();
+                    hasToken = false;
                     passToken();
                 }
             }, 0);
+
         } else {
             logger.trace("token repeat at " + nodeId);
+            passAck(nodeId);
         }
     }
 
@@ -92,13 +120,30 @@ public class Node {
     }
 
     private synchronized void passToken() {
-        resend = true;
+        resendToken = true;
         outChannel.sendMessage(token);
     }
 
     void init() {
         logger.info("init " + nodeId);
-        token = new Token(0);
+        token = new Token(outColor);
+        outColor = change(outColor);
         passToken();
+    }
+
+    private TokenColor change(TokenColor color) {
+        if(color == TokenColor.Black) return TokenColor.Red;
+        if(color == TokenColor.Red) return TokenColor.Black;
+        throw new IllegalStateException();
+    }
+
+    private void passAck(String nodeId) {
+        outChannel.sendMessage(new Ack(nodeId));
+    }
+    private void receiveAck(Ack message) {
+        resendToken = false;
+        if(message.getSender().equals(nextId)) {
+            passAck(message.getSender());
+        }
     }
 }

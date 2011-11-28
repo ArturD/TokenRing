@@ -21,17 +21,18 @@ public class ChannelMock implements InChannel, OutChannel {
     private final Timer timer;
     private final String inId;
     private final String outId;
-    private final CopyOnWriteArrayList<MessageListener> listeners;
+    double losPorbability = 50;
+    private final CopyOnWriteArrayList<TypedMessageListener> listeners;
 
     public ChannelMock(Timer timer, String inId, String outId) {
         this.timer = timer;
         this.inId = inId;
         this.outId = outId;
-        listeners = new CopyOnWriteArrayList<MessageListener>();
+        listeners = new CopyOnWriteArrayList<TypedMessageListener>();
     }
 
-    public void addMessageListener(MessageListener messageListener) {
-        listeners.add(messageListener);
+    public <T> void addMessageListener(Class<T> type, MessageListener<T> messageListener) {
+        listeners.add(new TypedMessageListener(messageListener,type));
     }
 
     public void sendMessage(final Object message) {
@@ -39,10 +40,11 @@ public class ChannelMock implements InChannel, OutChannel {
 
             @Override
             public void run() {
-                if(new Random().nextInt(100) < 50) {
+                if(new Random().nextInt(100) >= losPorbability) {
                     logger.trace("message " + message + " passed from " + inId + " to " + outId + " ");
-                    for(MessageListener listener : listeners) {
-                        listener.onMessage(message);
+                    for(TypedMessageListener listener : listeners) {
+                        if(message.getClass() == listener.getType())
+                        listener.getListener().onMessage(message);
                     }
                 }else {
                     logger.trace("message " + message + " lost from " + inId + " to " + outId + " ");
@@ -50,5 +52,40 @@ public class ChannelMock implements InChannel, OutChannel {
             }
         }, 0);
     }
-    
+
+    public double getLosPorbability() {
+        return losPorbability;
+    }
+
+    public void setLosPorbability(double losPorbability) {
+        this.losPorbability = losPorbability;
+    }
+
+
+
+    class TypedMessageListener {
+        MessageListener listener;
+        Class type;
+
+        public TypedMessageListener(MessageListener listener, Class type) {
+            this.listener = listener;
+            this.type = type;
+        }
+
+        public MessageListener getListener() {
+            return listener;
+        }
+
+        public void setListener(MessageListener listener) {
+            this.listener = listener;
+        }
+
+        public Class getType() {
+            return type;
+        }
+
+        public void setType(Class type) {
+            this.type = type;
+        }
+    }
 }

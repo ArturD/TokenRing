@@ -26,7 +26,7 @@ public class App
             channels.add(new ChannelMock(timer, "" +((i)%nodesNo) , "" +((1+i)%nodesNo)));
         }
         for(int i = 0; i<nodesNo; i++) {
-            nodes.add(new Node(channels.get((nodesNo + i - 1) %nodesNo),channels.get(i), timer, 100, "" + i));
+            nodes.add(new Node(channels.get((nodesNo + i - 1) %nodesNo),channels.get(i), timer, 100, "" + i, "" + ((i+1)%nodesNo)));
         }
         nodes.get(0).init();
     }
