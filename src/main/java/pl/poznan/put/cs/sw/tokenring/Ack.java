@@ -9,7 +9,7 @@ import java.io.Serializable;
 
 /**
  *
- * @author inf84789
+ ** @author Artur Dwornik inf84789
  */
 public class Ack implements Serializable {
     private String sender;
@@ -50,6 +50,6 @@ public class Ack implements Serializable {
 
     @Override
     public String toString() {
-        return "Avk { sender = " + sender +" }";
+        return "Ack { sender = " + sender +" }";
     }
 }

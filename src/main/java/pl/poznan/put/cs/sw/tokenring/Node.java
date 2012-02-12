@@ -15,7 +15,7 @@ import pl.poznan.put.cs.sw.tokenring.channels.MessageListener;
 
 /**
  *
- * @author Artur
+ ** @author Artur Dwornik inf84789
  */
 public class Node {
 
@@ -85,7 +85,9 @@ public class Node {
     }
 
     private synchronized void receive(final Token newToken) {
-        if (token == null || token.getColor() == inColor) {
+        logger.debug("recive token on" + nodeId + " with in color " + inColor
+                + " token " + newToken.toString());
+        if (!hasToken && newToken.getColor() == inColor) {
             logger.trace("new token accepted at " + nodeId);
             token = new Token(outColor);
 
@@ -93,11 +95,11 @@ public class Node {
             sendAck = false;
             outColor = change(outColor);
             inColor = change(inColor);
+            hasToken = true;
             timer.schedule(new TimerTask() {
 
                 @Override
                 public void run() {
-                    hasToken = true;
                     doStuff();
                     hasToken = false;
                     passToken();
@@ -117,6 +119,7 @@ public class Node {
         } catch (InterruptedException ex) {
             logger.fatal("interrupted exception on doStuff", ex);
         }
+        logger.info("end using token on " + nodeId);
     }
 
     private synchronized void passToken() {
@@ -140,6 +143,7 @@ public class Node {
     private void passAck(String nodeId) {
         outChannel.sendMessage(new Ack(nodeId));
     }
+
     private void receiveAck(Ack message) {
         resendToken = false;
         if(message.getSender().equals(nextId)) {

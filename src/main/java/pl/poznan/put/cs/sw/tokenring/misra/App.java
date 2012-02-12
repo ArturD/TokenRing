@@ -8,7 +8,7 @@ import org.apache.log4j.Logger;
 import pl.poznan.put.cs.sw.tokenring.channels.ChannelMock;
 
 /**
- * Hello world!
+ *** @author Artur Dwornik inf84789
  *
  */
 public class App 
@@ -24,11 +24,13 @@ public class App
         List<Node> nodes = new ArrayList<Node>();
         for(int i = 0; i<nodesNo; i++) {
             ChannelMock channel = new ChannelMock(timer, "" +((i)%nodesNo) , "" +((1+i)%nodesNo));
-            channel.setLosPorbability(0);
-            channels.add(new ChannelMock(timer, "" +((i)%nodesNo) , "" +((1+i)%nodesNo)));
+            channel.setLosPorbability(10);
+            channel.setMaxWait(200);
+            channel.setMinWait(0);
+            channels.add(channel);
         }
         for(int i = 0; i<nodesNo; i++) {
-            Node node = new Node(channels.get((nodesNo + i - 1) %nodesNo),channels.get(i), "" + i);
+            Node node = new Node(channels.get((nodesNo + i - 1) %nodesNo),channels.get(i), "" + i, nodesNo +1);
             nodes.add(node);
         }
         nodes.get(0).init();

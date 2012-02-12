@@ -7,7 +7,7 @@ package pl.poznan.put.cs.sw.tokenring;
 
 /**
  *
- * @author inf84789
+ ** @author Artur Dwornik inf84789
  */
 public enum TokenColor {
     Black,

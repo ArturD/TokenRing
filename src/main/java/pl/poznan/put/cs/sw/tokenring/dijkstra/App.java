@@ -2,13 +2,14 @@ package pl.poznan.put.cs.sw.tokenring.dijkstra;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.Timer;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import pl.poznan.put.cs.sw.tokenring.channels.ChannelMock;
 
 /**
- * Hello world!
+ *** @author Artur Dwornik inf84789
  *
  */
 public class App
@@ -25,10 +26,14 @@ public class App
         for(int i = 0; i<nodesNo; i++) {
             ChannelMock channel = new ChannelMock(timer, "" +((i)%nodesNo) , "" +((1+i)%nodesNo));
             channel.setLosPorbability(0);
-            channels.add(new ChannelMock(timer, "" +((i)%nodesNo) , "" +((1+i)%nodesNo)));
+            channel.setMinWait(0);
+            channel.setMaxWait(0);
+            channels.add(channel);
         }
+        Random rand = new Random();
+        GlobalState globalState = new GlobalState(nodes);
         for(int i = 0; i<nodesNo; i++) {
-            Node node = new Node(channels.get((nodesNo + i - 1) %nodesNo),channels.get(i), i);
+            Node node = new Node(channels.get((nodesNo + i - 1) %nodesNo),channels.get(i), globalState, i,rand.nextInt(3), nodesNo);
             nodes.add(node);
         }
         for(int i=0; i<nodesNo; i++) nodes.get(i).run();

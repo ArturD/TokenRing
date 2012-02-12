@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 /**
  *
- * @author Artur
+ ** @author Artur Dwornik inf84789
  */
 public class PingToken implements Serializable {
     private int counter;
